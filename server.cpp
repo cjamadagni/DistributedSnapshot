@@ -29,7 +29,6 @@ void stage_transaction(int node_id, std::string input) {
 }
 
 std::string last_checkpointed_node_state(int *flag) {
-  //TODO: handle channel states
   std::string balance;
   std::ifstream file;
   std::string file_name = "ledger" + file_suffix + ".txt";
