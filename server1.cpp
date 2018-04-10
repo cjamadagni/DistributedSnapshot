@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include "Socket.hpp"
 
@@ -7,6 +8,15 @@
 
 // Application Specific Details
 #define INITIAL_BANK_BALANCE 100
+
+int checkpoint(int balance) {
+  std::ofstream file;
+  file.open("ledger.txt", ios::out);
+  file << balance;
+  file.close();
+
+  return 1;
+}
 
 int credit(std::string input, int *balance) {
   int credit_amount = std::stoi(input.substr(2));
@@ -32,6 +42,7 @@ int main() {
       Socket::Datagram d = s.receive();
 
       if (d.data == "S") {
+        return_code = checkpoint(bank_balance);
         s.send("127.0.0.1", CLIENT_PORT, "Successful Checkpoint");
       }
       else if (d.data == "T") {
