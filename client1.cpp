@@ -46,21 +46,28 @@ int main() {
         Socket::Datagram d = s.receive();
         std::cout << d.data << endl;
       }
-      else if (choice == 3) {
+
+      else if (choice == 3 || choice == 4) {
         std::cout << endl << endl;
-        std::cout << "Enter node ID to credit: ";
+        std::cout << "Enter node ID to credit/debit: ";
         std::cin >> node_id;
         std::cout << endl << "Enter Amount: $";
         std::cin >> amount;
         std::cout << endl << endl;
 
-        std::string credit_msg = "C " + std::to_string(amount);
-        std::cout << credit_msg << endl;
-
-        s.send("127.0.0.1", SERVER_PORT, credit_msg);
-
+        std::string msg;
+        if (choice == 3) {
+          msg = "C " + std::to_string(amount);
+        }
+        else if (choice == 4) {
+          msg = "D " + std::to_string(amount);
+        }
+        std::cout << msg;
+        s.send("127.0.0.1", SERVER_PORT, msg);
       }
+
       else if (choice == 0) {
+        s.send("127.0.0.1", SERVER_PORT, "T");
         s.close();
         break;
       }

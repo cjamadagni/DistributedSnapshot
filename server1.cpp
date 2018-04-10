@@ -14,6 +14,12 @@ int credit(std::string input, int *balance) {
   return 1;
 }
 
+int debit(std::string input, int *balance) {
+  int debit_amount = std::stoi(input.substr(2));
+  *balance -= debit_amount;
+  return 1;
+}
+
 int main() {
   int bank_balance = INITIAL_BANK_BALANCE;
   int return_code;
@@ -34,9 +40,12 @@ int main() {
       }
       else if (d.data.at(0) == 'C') {
         return_code = credit(d.data, &bank_balance);
-        std::cout << "Remaining Balance = " << bank_balance << endl;
+        std::cout << "Remaining Balance = " << bank_balance << endl << endl;;
       }
-
+      else if (d.data.at(0) == 'D') {
+        return_code = debit(d.data, &bank_balance);
+        std::cout << "Remaining Balance = " << bank_balance << endl << endl;;
+      }
     }
   }
   catch(Socket::Exception &e) {
