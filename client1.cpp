@@ -3,8 +3,8 @@
 #include <string>
 #include "Socket.hpp"
 
-#define CLIENT_PORT 3000
-#define SERVER_PORT 2000
+// #define CLIENT_PORT 3000
+// #define SERVER_PORT 2000
 
 int menu() {
 
@@ -28,8 +28,11 @@ int menu() {
 
 }
 
-int main() {
+int main(int argc, char** argv) {
   int choice, node_id, amount;
+
+  int SERVER_PORT = std::stoi(argv[1]);
+  int CLIENT_PORT = SERVER_PORT - 1;
 
   try {
 
@@ -43,8 +46,8 @@ int main() {
 
       if (choice == 1) {
         s.send("127.0.0.1", SERVER_PORT, "S");
-        Socket::Datagram d = s.receive();
-        std::cout << d.data << endl;
+        //Socket::Datagram d = s.receive();
+        //std::cout << d.data << endl;
       }
 
       else if (choice == 2) {
