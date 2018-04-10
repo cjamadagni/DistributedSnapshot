@@ -56,6 +56,8 @@ int main(int argc, char** argv) {
   int SERVER_PORT = std::stoi(argv[1]);
   int CLIENT_PORT = SERVER_PORT - 1;
 
+  std::cout<<"\n\nNode ID = " << SERVER_PORT;
+
   // Initializing clients
   std::vector<int> nodes;
   initialize_clients(nodes, SERVER_PORT);
@@ -75,7 +77,7 @@ int main(int argc, char** argv) {
         for (int i=0; i<nodes.size(); i++) {
           s.send("127.0.0.1", nodes.at(i), "S");
         }
-        //s.send("127.0.0.1", SERVER_PORT, "S");
+        s.send("127.0.0.1", SERVER_PORT, "S");
         //Socket::Datagram d = s.receive();
         //std::cout << d.data << endl;
       }
@@ -83,7 +85,7 @@ int main(int argc, char** argv) {
       else if (choice == 2) {
         s.send("127.0.0.1", SERVER_PORT, "L");
         Socket::Datagram d1 = s.receive();
-        std::cout << d1.data << endl << endl;
+        std::cout << endl << d1.data << endl << endl;
         Socket::Datagram d2 = s.receive();
         if (d2.data.length() > 0) {
           std::cout << "Staged Transations" << endl;

@@ -19,7 +19,7 @@ int checkpoint(int balance) {
 }
 
 void stage_transaction(int node_id, std::string input) {
-  std::string t = std::to_string(node_id) + " " + input;
+  std::string t = std::to_string(node_id+1) + " " + input;
   std::ofstream file;
   std::string file_name = "temp" + file_suffix + ".txt";
   file.open(file_name, ios::app);
@@ -97,11 +97,6 @@ int main(int argc, char** argv) {
     while (true) {
       Socket::Datagram d = s.receive();
 
-      if (marker_count > 1) {
-        std::ofstream file;
-        file.open("transaction.txt", ios::out);
-      }
-
       if (d.data == "S") {
         std::cout << endl << "Received checkpoint marker." << endl;
 
@@ -143,13 +138,13 @@ int main(int argc, char** argv) {
       }
       else if (d.data.at(0) == 'D') {
         if (checkpoint_active) {
-          return_code = credit(d.data, &bank_balance);
+          return_code = debit(d.data, &bank_balance);
           stage_transaction(d.address.port, d.data);
           marker_count++;
           std::cout << marker_count << endl;
         }
         else {
-          return_code = credit(d.data, &bank_balance);
+          return_code = debit(d.data, &bank_balance);
           std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
       }
