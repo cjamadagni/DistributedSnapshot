@@ -18,7 +18,7 @@ int checkpoint(int balance) {
   return 1;
 }
 
-std::string last_checkpointed_state() {
+std::string last_checkpointed_node_state(int *flag) {
   //TODO: handle channel states
   std::string balance;
   std::ifstream file;
@@ -28,10 +28,30 @@ std::string last_checkpointed_state() {
 
   if (balance == "N" ) {
     return "No checkpoint taken yet.";
+    *flag = 0;
   }
   else {
     return "Balance Amount = " + balance;
   }
+}
+
+std::string last_checkpointed_channel_states() {
+  //TODO: handle channel states
+  std::string staged_transactions = "";
+  std::string line;
+  std::ifstream file;
+  file.open("transaction.txt");
+
+  while (file && std::getline(file, line)) {
+    if (line.length() == 0) {
+      continue;
+    }
+    staged_transactions = staged_transactions + line;
+    staged_transactions = staged_transactions + "\n";
+  }
+  
+  file.close();
+  return staged_transactions;
 }
 
 int credit(std::string input, int *balance) {
@@ -63,7 +83,11 @@ int main() {
         s.send("127.0.0.1", CLIENT_PORT, "Successful Checkpoint");
       }
       else if (d.data == "L") {
-        s.send("127.0.0.1", CLIENT_PORT, last_checkpointed_state());
+        int flag = 1;
+        s.send("127.0.0.1", CLIENT_PORT, last_checkpointed_node_state(&flag));
+        if (flag == 1) {
+          s.send("127.0.0.1", CLIENT_PORT, last_checkpointed_channel_states());
+        }
       }
       else if (d.data == "T") {
         s.close();

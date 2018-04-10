@@ -49,8 +49,11 @@ int main() {
 
       else if (choice == 2) {
         s.send("127.0.0.1", SERVER_PORT, "L");
-        Socket::Datagram d = s.receive();
-        std::cout << d.data << endl;
+        Socket::Datagram d1 = s.receive();
+        std::cout << d1.data << endl << endl;
+        Socket::Datagram d2 = s.receive();
+        std::cout << "Staged Transations" << endl;
+        std::cout << d2.data << endl;
       }
 
       else if (choice == 3 || choice == 4) {
