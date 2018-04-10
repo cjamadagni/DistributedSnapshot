@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <string>
 #include "Socket.hpp"
 
 #define CLIENT_PORT 3000
@@ -9,15 +10,18 @@ int menu() {
 
   int choice;
 
-  std::cout << "\n\n";
-  std::cout << "1. Trigger Snapshot\n";
-  std::cout << "2. Show Last Saved State\n";
-  std::cout << "\n\n";
+  std::cout << endl << endl;;
+  std::cout << "1. Trigger Snapshot" << endl;
+  std::cout << "2. Show Last Saved State" << endl;
+  std::cout << "3. Credit Amount" << endl;
+  std::cout << "4. Debit Amount" << endl;
+  std::cout << endl << endl;;
   std::cout << "Choice: ";
   std::cin >> choice;
 
-  if (choice < 0 || choice > 2) {
+  if (choice < 0 || choice > 4) {
     std::cout << "\n\nInvalid choice\n\n";
+    return -1;
   }
 
   return choice;
@@ -25,7 +29,7 @@ int menu() {
 }
 
 int main() {
-  int choice;
+  int choice, node_id, amount;
 
   try {
 
@@ -42,8 +46,21 @@ int main() {
         Socket::Datagram d = s.receive();
         std::cout << d.data << endl;
       }
+      else if (choice == 3) {
+        std::cout << endl << endl;
+        std::cout << "Enter node ID to credit: ";
+        std::cin >> node_id;
+        std::cout << endl << "Enter Amount: $";
+        std::cin >> amount;
+        std::cout << endl << endl;
 
-      else if (choice == 2) {
+        std::string credit_msg = "C " + std::to_string(amount);
+        std::cout << credit_msg << endl;
+
+        s.send("127.0.0.1", SERVER_PORT, credit_msg);
+
+      }
+      else if (choice == 0) {
         s.close();
         break;
       }

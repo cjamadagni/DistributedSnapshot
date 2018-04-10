@@ -1,20 +1,42 @@
-
 #include <iostream>
+#include <string>
 #include "Socket.hpp"
 
 #define CLIENT_PORT 3000
 #define SERVER_PORT 2000
 
+// Application Specific Details
+#define INITIAL_BANK_BALANCE 100
+
+int credit(std::string input, int *balance) {
+  int credit_amount = std::stoi(input.substr(2));
+  *balance += credit_amount;
+  return 1;
+}
+
 int main() {
+  int bank_balance = INITIAL_BANK_BALANCE;
+  int return_code;
+
   try {
     Socket::UDP s;
     s.bind(2000);
 
-    Socket::Datagram d = s.receive();
+    while (true) {
+      Socket::Datagram d = s.receive();
 
-    if (d.data == "S") {
-      s.send("127.0.0.1", CLIENT_PORT, "Successful Checkpoint");
-      s.close();
+      if (d.data == "S") {
+        s.send("127.0.0.1", CLIENT_PORT, "Successful Checkpoint");
+      }
+      else if (d.data == "T") {
+        s.close();
+        break;
+      }
+      else if (d.data.at(0) == 'C') {
+        return_code = credit(d.data, &bank_balance);
+        std::cout << "Remaining Balance = " << bank_balance << endl;
+      }
+
     }
   }
   catch(Socket::Exception &e) {
