@@ -21,7 +21,7 @@ int checkpoint(int balance) {
 void stage_transaction(int node_id, std::string input) {
   std::string t = std::to_string(node_id+1) + " " + input;
   std::ofstream file;
-  std::string file_name = "temp" + file_suffix + ".txt";
+  std::string file_name = "log" + file_suffix + ".txt";
   file.open(file_name, ios::app);
   file << t;
   file << "\n";
@@ -50,7 +50,7 @@ std::string last_checkpointed_channel_states() {
   std::string staged_transactions = "";
   std::string line;
   std::ifstream file;
-  std::string file_name = "temp" + file_suffix + ".txt";
+  std::string file_name = "log" + file_suffix + ".txt";
   file.open(file_name);
 
   while (file && std::getline(file, line)) {
