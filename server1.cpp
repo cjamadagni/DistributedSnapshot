@@ -18,6 +18,22 @@ int checkpoint(int balance) {
   return 1;
 }
 
+std::string last_checkpointed_state() {
+  //TODO: handle channel states
+  std::string balance;
+  std::ifstream file;
+  file.open("ledger.txt");
+  file >> balance;
+  file.close();
+
+  if (balance == "N" ) {
+    return "No checkpoint taken yet.";
+  }
+  else {
+    return "Balance Amount = " + balance;
+  }
+}
+
 int credit(std::string input, int *balance) {
   int credit_amount = std::stoi(input.substr(2));
   *balance += credit_amount;
@@ -43,7 +59,11 @@ int main() {
 
       if (d.data == "S") {
         return_code = checkpoint(bank_balance);
+        //TODO: Don't send back Successful message until all channel states get blocked
         s.send("127.0.0.1", CLIENT_PORT, "Successful Checkpoint");
+      }
+      else if (d.data == "L") {
+        s.send("127.0.0.1", CLIENT_PORT, last_checkpointed_state());
       }
       else if (d.data == "T") {
         s.close();

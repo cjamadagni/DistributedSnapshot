@@ -47,6 +47,12 @@ int main() {
         std::cout << d.data << endl;
       }
 
+      else if (choice == 2) {
+        s.send("127.0.0.1", SERVER_PORT, "L");
+        Socket::Datagram d = s.receive();
+        std::cout << d.data << endl;
+      }
+
       else if (choice == 3 || choice == 4) {
         std::cout << endl << endl;
         std::cout << "Enter node ID to credit/debit: ";
@@ -62,7 +68,6 @@ int main() {
         else if (choice == 4) {
           msg = "D " + std::to_string(amount);
         }
-        std::cout << msg;
         s.send("127.0.0.1", SERVER_PORT, msg);
       }
 
