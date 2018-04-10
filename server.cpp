@@ -1,17 +1,17 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include "Socket.hpp"
-
-// #define CLIENT_PORT 3000
-// #define SERVER_PORT 2000
 
 // Application Specific Details
 #define INITIAL_BANK_BALANCE 100
+std::string file_suffix;
 
 int checkpoint(int balance) {
   std::ofstream file;
-  file.open("ledger.txt", ios::out);
+  std::string file_name = "ledger" + file_suffix + ".txt";
+  file.open(file_name, ios::out);
   file << balance;
   file.close();
 
@@ -21,7 +21,8 @@ int checkpoint(int balance) {
 void stage_transaction(int node_id, std::string input) {
   std::string t = std::to_string(node_id) + " " + input;
   std::ofstream file;
-  file.open("temp.txt", ios::app);
+  std::string file_name = "temp" + file_suffix + ".txt";
+  file.open(file_name, ios::app);
   file << t;
   file << "\n";
   file.close();
@@ -31,7 +32,8 @@ std::string last_checkpointed_node_state(int *flag) {
   //TODO: handle channel states
   std::string balance;
   std::ifstream file;
-  file.open("ledger.txt");
+  std::string file_name = "ledger" + file_suffix + ".txt";
+  file.open(file_name);
   file >> balance;
   file.close();
 
@@ -49,7 +51,8 @@ std::string last_checkpointed_channel_states() {
   std::string staged_transactions = "";
   std::string line;
   std::ifstream file;
-  file.open("transaction.txt");
+  std::string file_name = "temp" + file_suffix + ".txt";
+  file.open(file_name);
 
   while (file && std::getline(file, line)) {
     if (line.length() == 0) {
@@ -85,6 +88,7 @@ int main(int argc, char** argv) {
   //configuration parameters
   int SERVER_PORT = std::stoi(argv[1]);
   int CLIENT_PORT = SERVER_PORT - 1;
+  file_suffix = argv[1];
 
   try {
     Socket::UDP s;
@@ -99,15 +103,15 @@ int main(int argc, char** argv) {
       }
 
       if (d.data == "S") {
-        //marker_count++;
+        std::cout << endl << "Received checkpoint marker." << endl;
 
         if (marker_count == 1) {
           return_code = checkpoint(bank_balance);
           checkpoint_active = true;
         }
-        if (marker_count == 4) {
+        if (marker_count >= 2) {
           //s.send("127.0.0.1", CLIENT_PORT, "Successful Checkpoint");
-          std::cout << endl << "Collected Node and Channel States" << endl << endl;
+          std::cout << endl << "Received all markers. Saved all node and channel states." << endl << endl;
           marker_count = 1;
           checkpoint_active = false;
         }
@@ -134,7 +138,7 @@ int main(int argc, char** argv) {
         }
         else {
           return_code = credit(d.data, &bank_balance);
-          std::cout << "Remaining Balance = " << bank_balance << endl << endl;
+          std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
       }
       else if (d.data.at(0) == 'D') {
@@ -146,7 +150,7 @@ int main(int argc, char** argv) {
         }
         else {
           return_code = credit(d.data, &bank_balance);
-          std::cout << "Remaining Balance = " << bank_balance << endl << endl;
+          std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
       }
     }

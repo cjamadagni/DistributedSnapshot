@@ -1,17 +1,39 @@
-
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <vector>
 #include "Socket.hpp"
 
-// #define CLIENT_PORT 3000
-// #define SERVER_PORT 2000
+void initialize_clients(std::vector<int> &v, int my_port) {
+  std::string line;
+  std::ifstream file;
+  file.open("config.cfg");
+  while (file && std::getline(file, line)) {
+    if (line.length() == 0) {
+      continue;
+    }
+    int port = std::stoi(line);
+    if (port != my_port) {
+        v.push_back(port);
+    }
+  }
+  file.close();
+}
+
+bool input_check(int node_id, std::vector<int> &v) {
+  bool flag = false;
+  for (int i=0; i<v.size(); i++) {
+    if (v.at(i) == node_id) {
+      flag = true;
+    }
+  }
+  return flag;
+}
 
 int menu() {
-
   int choice;
-
   std::cout << endl << endl;;
-  std::cout << "1. Trigger Snapshot" << endl;
+  std::cout << "1. Trigger Snapshot / Return Marker" << endl;
   std::cout << "2. Show Last Saved State" << endl;
   std::cout << "3. Credit Amount" << endl;
   std::cout << "4. Debit Amount" << endl;
@@ -34,6 +56,11 @@ int main(int argc, char** argv) {
   int SERVER_PORT = std::stoi(argv[1]);
   int CLIENT_PORT = SERVER_PORT - 1;
 
+  // Initializing clients
+  std::vector<int> nodes;
+  initialize_clients(nodes, SERVER_PORT);
+
+
   try {
 
     // Creating and binding socket to port
@@ -45,7 +72,10 @@ int main(int argc, char** argv) {
       choice = menu();
 
       if (choice == 1) {
-        s.send("127.0.0.1", SERVER_PORT, "S");
+        for (int i=0; i<nodes.size(); i++) {
+          s.send("127.0.0.1", nodes.at(i), "S");
+        }
+        //s.send("127.0.0.1", SERVER_PORT, "S");
         //Socket::Datagram d = s.receive();
         //std::cout << d.data << endl;
       }
@@ -55,8 +85,10 @@ int main(int argc, char** argv) {
         Socket::Datagram d1 = s.receive();
         std::cout << d1.data << endl << endl;
         Socket::Datagram d2 = s.receive();
-        std::cout << "Staged Transations" << endl;
-        std::cout << d2.data << endl;
+        if (d2.data.length() > 0) {
+          std::cout << "Staged Transations" << endl;
+          std::cout << d2.data << endl;
+        }
       }
 
       else if (choice == 3 || choice == 4) {
@@ -67,14 +99,22 @@ int main(int argc, char** argv) {
         std::cin >> amount;
         std::cout << endl << endl;
 
-        std::string msg;
+        if (!input_check(node_id,nodes)) {
+          std::cout << "Entered Node ID not in the config file" << endl << endl;
+          continue;
+        }
+
+        std::string out_msg, in_msg;
         if (choice == 3) {
-          msg = "C " + std::to_string(amount);
+          out_msg = "C " + std::to_string(amount);
+          in_msg = "D " + std::to_string(amount);
         }
         else if (choice == 4) {
-          msg = "D " + std::to_string(amount);
+          out_msg = "D " + std::to_string(amount);
+          in_msg = "C " + std::to_string(amount);
         }
-        s.send("127.0.0.1", SERVER_PORT, msg);
+        s.send("127.0.0.1", node_id, out_msg);
+        s.send("127.0.0.1", SERVER_PORT, in_msg);
       }
 
       else if (choice == 0) {

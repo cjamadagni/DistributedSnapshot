@@ -1,2 +1,2 @@
-g++ client1.cpp -o client.out
-g++ server1.cpp -o server.out
+g++ client.cpp -o client.out
+g++ server.cpp -o server.out
