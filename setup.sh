@@ -1,10 +1,16 @@
 #!/bin/sh
 
+# Moving into data directory
+cd Data
+
 # Removing stray text files
 if ls -A *.txt >/dev/null 2>/dev/null
 then
     rm *.txt >/dev/null 2>/dev/null
 fi
+
+# Returning to root directory
+cd ..
 
 # Removing stray object files
 if ls *.out >/dev/null 2>/dev/null

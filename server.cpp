@@ -12,6 +12,7 @@ Server code for a particular node.
 // Constant control information
 #define INITIAL_BANK_BALANCE 100
 std::string file_suffix;
+std::string file_prefix = "Data/";
 
 // Utility function to determine whether logged entry is credit/debit/invalid
 int recover_utility(std::string input) {
@@ -33,7 +34,7 @@ int recover_utility(std::string input) {
 int recover() {
   std::string balance;
   std::ifstream ledger;
-  std::string file_name = "ledger" + file_suffix + ".txt";
+  std::string file_name = file_prefix + "ledger" + file_suffix + ".txt";
   ledger.open(file_name);
   ledger >> balance;
   ledger.close();
@@ -47,7 +48,7 @@ int recover() {
 
     std::string line;
     std::ifstream logs;
-    std::string file_name = "log" + file_suffix + ".txt";
+    std::string file_name = file_prefix + "log" + file_suffix + ".txt";
     logs.open(file_name);
 
     while (logs && std::getline(logs, line)) {
@@ -68,13 +69,13 @@ int recover() {
 // Function to checkpoint/ take snapshot
 int checkpoint(int balance) {
   std::ofstream file;
-  std::string file_name = "ledger" + file_suffix + ".txt";
+  std::string file_name = file_prefix + "ledger" + file_suffix + ".txt";
   file.open(file_name, ios::out);
   file << balance;
   file.close();
 
   // Deleting old log
-  std::string logfile_name = "log" + file_suffix + ".txt";
+  std::string logfile_name = file_prefix + "log" + file_suffix + ".txt";
   std::ofstream log_file;
   log_file.open(logfile_name, std::ofstream::out | std::ofstream::trunc);
   log_file.close();
@@ -86,7 +87,7 @@ int checkpoint(int balance) {
 void stage_transaction(int node_id, std::string input) {
   std::string t = std::to_string(node_id+1) + " " + input;
   std::ofstream file;
-  std::string file_name = "log" + file_suffix + ".txt";
+  std::string file_name = file_prefix + "log" + file_suffix + ".txt";
   file.open(file_name, ios::app);
   file << t;
   file << "\n";
@@ -97,7 +98,7 @@ void stage_transaction(int node_id, std::string input) {
 std::string last_checkpointed_node_state(int *flag) {
   std::string balance;
   std::ifstream file;
-  std::string file_name = "ledger" + file_suffix + ".txt";
+  std::string file_name = file_prefix + "ledger" + file_suffix + ".txt";
   file.open(file_name);
   file >> balance;
   file.close();
@@ -116,7 +117,7 @@ std::string last_checkpointed_channel_states() {
   std::string staged_transactions = "";
   std::string line;
   std::ifstream file;
-  std::string file_name = "log" + file_suffix + ".txt";
+  std::string file_name = file_prefix + "log" + file_suffix + ".txt";
   file.open(file_name);
 
   while (file && std::getline(file, line)) {
@@ -173,7 +174,7 @@ int main(int argc, char** argv) {
 
       // Handling snapshot/marker messages
       if (d.data == "S") {
-        std::cout << endl << "Received checkpoint marker." << endl;
+        std::cout << endl << "Received checkpoint marker." << endl << endl;
         marker_count++;
 
         if (marker_count == 1) {

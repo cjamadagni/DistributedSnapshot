@@ -17,8 +17,8 @@ int main() {
       continue;
     }
 
-    std::string file1 = "ledger" + line + ".txt";
-    std::string cmd2 = "touch log" + line + ".txt";
+    std::string file1 = "Data/ledger" + line + ".txt";
+    std::string cmd2 = "touch Data/log" + line + ".txt";
     const char* cmd = cmd2.c_str();
 
     // Initializing Ledger File
