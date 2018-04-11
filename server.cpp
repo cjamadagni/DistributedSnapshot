@@ -65,6 +65,12 @@ int checkpoint(int balance) {
   file << balance;
   file.close();
 
+  // Deleting old log
+  std::string logfile_name = "log" + file_suffix + ".txt";
+  std::ofstream log_file;
+  log_file.open(logfile_name, std::ofstream::out | std::ofstream::trunc);
+  log_file.close();
+
   return 1;
 }
 
