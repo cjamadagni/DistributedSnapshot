@@ -135,7 +135,7 @@ int debit(std::string input, int *balance) {
 int main(int argc, char** argv) {
   int bank_balance;
   int return_code;
-  int marker_count = 1;
+  int marker_count = 0;
   bool checkpoint_active = false;
   int staged_bank_balance;
   int num_of_nodes;
@@ -160,6 +160,7 @@ int main(int argc, char** argv) {
 
       if (d.data == "S") {
         std::cout << endl << "Received checkpoint marker." << endl;
+        marker_count++;
 
         if (marker_count == 1) {
           return_code = checkpoint(bank_balance);
@@ -167,7 +168,7 @@ int main(int argc, char** argv) {
         }
         if (marker_count >= num_of_nodes) {
           std::cout << endl << "Snapshot complete. Received all markers. Saved all node and channel states." << endl << endl;
-          marker_count = 1;
+          marker_count = 0;
           checkpoint_active = false;
         }
       }
@@ -187,7 +188,7 @@ int main(int argc, char** argv) {
         if (checkpoint_active) {
           return_code = credit(d.data, &bank_balance);
           stage_transaction(d.address.port, d.data);
-          marker_count++;
+          //marker_count++;
           std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
         else {
@@ -199,7 +200,7 @@ int main(int argc, char** argv) {
         if (checkpoint_active) {
           return_code = debit(d.data, &bank_balance);
           stage_transaction(d.address.port, d.data);
-          marker_count++;
+          //marker_count++;
           std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
         else {
