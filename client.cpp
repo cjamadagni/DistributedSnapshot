@@ -82,8 +82,6 @@ int main(int argc, char** argv) {
           s.send("127.0.0.1", nodes.at(i), "S");
         }
         s.send("127.0.0.1", SERVER_PORT, "S");
-        //Socket::Datagram d = s.receive();
-        //std::cout << d.data << endl;
       }
 
       else if (choice == 2) {

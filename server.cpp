@@ -102,7 +102,6 @@ std::string last_checkpointed_node_state(int *flag) {
 }
 
 std::string last_checkpointed_channel_states() {
-  //TODO: handle channel states
   std::string staged_transactions = "";
   std::string line;
   std::ifstream file;
@@ -167,7 +166,6 @@ int main(int argc, char** argv) {
           checkpoint_active = true;
         }
         if (marker_count >= num_of_nodes) {
-          //s.send("127.0.0.1", CLIENT_PORT, "Successful Checkpoint");
           std::cout << endl << "Snapshot complete. Received all markers. Saved all node and channel states." << endl << endl;
           marker_count = 1;
           checkpoint_active = false;
