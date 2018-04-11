@@ -1,3 +1,8 @@
+/*
+Server code to create empty logs and ledgers.
+@author Chirag Jamadagni
+*/
+
 #include <iostream>
 #include <fstream>
 
@@ -6,12 +11,12 @@ int main() {
   std::ifstream file;
   file.open("config.cfg");
 
-
+  // Reading topology info from config file
   while (file && std::getline(file, line)) {
     if (line.length() == 0) {
       continue;
     }
-    
+
     std::string file1 = "ledger" + line + ".txt";
     std::string cmd2 = "touch log" + line + ".txt";
     const char* cmd = cmd2.c_str();

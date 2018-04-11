@@ -1,9 +1,16 @@
+/*
+Client code for a particular node.
+@author Chirag Jamadagni
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include "Socket.hpp"
 
+
+// Function to read config file and identify all node IDs
 void initialize_clients(std::vector<int> &v, int my_port) {
   std::string line;
   std::ifstream file;
@@ -20,6 +27,7 @@ void initialize_clients(std::vector<int> &v, int my_port) {
   file.close();
 }
 
+// Input validation to ensure that a valid node ID is entered for credit/debit operations
 bool input_check(int node_id, std::vector<int> &v) {
   bool flag = false;
   for (int i=0; i<v.size(); i++) {
@@ -30,6 +38,7 @@ bool input_check(int node_id, std::vector<int> &v) {
   return flag;
 }
 
+// Utility function to print the option menu
 int menu() {
   int choice;
   std::cout << endl << endl;;
@@ -53,6 +62,10 @@ int menu() {
 int main(int argc, char** argv) {
   int choice, node_id, amount;
 
+  /*
+  Reading command line argument to get server and client ports.
+  NOTE: Node ID doubles up as the server port
+  */
   int SERVER_PORT = std::stoi(argv[1]);
   int CLIENT_PORT = SERVER_PORT - 1;
 
@@ -77,6 +90,7 @@ int main(int argc, char** argv) {
 
       choice = menu();
 
+      // Trigger checkpoint / propogate snapshot markers
       if (choice == 1) {
         for (int i=0; i<nodes.size(); i++) {
           s.send("127.0.0.1", nodes.at(i), "S");
@@ -84,6 +98,7 @@ int main(int argc, char** argv) {
         s.send("127.0.0.1", SERVER_PORT, "S");
       }
 
+      // Display the last checkpoint state
       else if (choice == 2) {
         s.send("127.0.0.1", SERVER_PORT, "L");
         Socket::Datagram d1 = s.receive();
@@ -95,6 +110,7 @@ int main(int argc, char** argv) {
         }
       }
 
+      // Credit / debit operations
       else if (choice == 3 || choice == 4) {
         std::cout << endl << endl;
         std::cout << "Enter node ID to credit/debit: ";
@@ -121,6 +137,7 @@ int main(int argc, char** argv) {
         s.send("127.0.0.1", SERVER_PORT, in_msg);
       }
 
+      // Powering off the node / Used to simulate failure.
       else if (choice == 0) {
         s.send("127.0.0.1", SERVER_PORT, "T");
         s.close();

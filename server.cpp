@@ -1,13 +1,19 @@
+/*
+Server code for a particular node.
+@author Chirag Jamadagni
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include "Socket.hpp"
 
-// Application Specific Details
+// Constant control information
 #define INITIAL_BANK_BALANCE 100
 std::string file_suffix;
 
+// Utility function to determine whether logged entry is credit/debit/invalid
 int recover_utility(std::string input) {
   char operation = input.at(5);
 
@@ -23,6 +29,7 @@ int recover_utility(std::string input) {
   }
 }
 
+// Function to recover state of node on failure
 int recover() {
   std::string balance;
   std::ifstream ledger;
@@ -58,6 +65,7 @@ int recover() {
 
 }
 
+// Function to checkpoint/ take snapshot
 int checkpoint(int balance) {
   std::ofstream file;
   std::string file_name = "ledger" + file_suffix + ".txt";
@@ -74,6 +82,7 @@ int checkpoint(int balance) {
   return 1;
 }
 
+// Function to capture channel state/ staged transactions
 void stage_transaction(int node_id, std::string input) {
   std::string t = std::to_string(node_id+1) + " " + input;
   std::ofstream file;
@@ -84,6 +93,7 @@ void stage_transaction(int node_id, std::string input) {
   file.close();
 }
 
+// Function to obtain the last checkpointed ledger value
 std::string last_checkpointed_node_state(int *flag) {
   std::string balance;
   std::ifstream file;
@@ -101,6 +111,7 @@ std::string last_checkpointed_node_state(int *flag) {
   }
 }
 
+// Function to obtain the staged transactions
 std::string last_checkpointed_channel_states() {
   std::string staged_transactions = "";
   std::string line;
@@ -120,12 +131,14 @@ std::string last_checkpointed_channel_states() {
   return staged_transactions;
 }
 
+// Function to credit an amount to the bank balance
 int credit(std::string input, int *balance) {
   int credit_amount = std::stoi(input.substr(2));
   *balance += credit_amount;
   return 1;
 }
 
+// Function to debit an amount from the bank balance
 int debit(std::string input, int *balance) {
   int debit_amount = std::stoi(input.substr(2));
   *balance -= debit_amount;
@@ -158,6 +171,7 @@ int main(int argc, char** argv) {
     while (true) {
       Socket::Datagram d = s.receive();
 
+      // Handling snapshot/marker messages
       if (d.data == "S") {
         std::cout << endl << "Received checkpoint marker." << endl;
         marker_count++;
@@ -172,6 +186,8 @@ int main(int argc, char** argv) {
           checkpoint_active = false;
         }
       }
+
+      // Handling return current state messages
       else if (d.data == "L") {
         int flag = 1;
         s.send("127.0.0.1", CLIENT_PORT, last_checkpointed_node_state(&flag));
@@ -179,10 +195,14 @@ int main(int argc, char** argv) {
           s.send("127.0.0.1", CLIENT_PORT, last_checkpointed_channel_states());
         }
       }
+
+      // Handling shutdown messages
       else if (d.data == "T") {
         s.close();
         break;
       }
+
+      // Handling credit messages
       else if (d.data.at(0) == 'C') {
 
         if (checkpoint_active) {
@@ -196,6 +216,8 @@ int main(int argc, char** argv) {
           std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
       }
+
+      // handling debit messages
       else if (d.data.at(0) == 'D') {
         if (checkpoint_active) {
           return_code = debit(d.data, &bank_balance);
@@ -208,6 +230,7 @@ int main(int argc, char** argv) {
           std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
       }
+
     }
   }
   catch(Socket::Exception &e) {
