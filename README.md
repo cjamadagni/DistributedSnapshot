@@ -1,5 +1,5 @@
 # DistributedSnapshot
-Basic implementation of the Chandy Lamport Distributed Snapshot algorithm. 
+Basic simulation of the Chandy Lamport Distributed Snapshot algorithm. Realized through a basic banking/ledger application.
 
 ## Setup
 
