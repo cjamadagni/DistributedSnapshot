@@ -8,6 +8,56 @@
 #define INITIAL_BANK_BALANCE 100
 std::string file_suffix;
 
+int recover_utility(std::string input) {
+  char operation = input.at(5);
+
+  if (operation == 'C') {
+    return std::stoi(input.substr(7));
+  }
+  else if (operation == 'D') {
+    return -1 * std::stoi(input.substr(7));
+  }
+  else {
+    std::cout << endl << endl << "Recovery Log is Corrupted.\n\nTerminate Simulation and run setup.sh script." << endl << endl;
+    return -1;
+  }
+}
+
+int recover() {
+  std::string balance;
+  std::ifstream ledger;
+  std::string file_name = "ledger" + file_suffix + ".txt";
+  ledger.open(file_name);
+  ledger >> balance;
+  ledger.close();
+
+  if (balance == "N") {
+    return INITIAL_BANK_BALANCE;
+  }
+  else {
+
+    int b = std::stoi(balance);
+
+    std::string line;
+    std::ifstream logs;
+    std::string file_name = "log" + file_suffix + ".txt";
+    logs.open(file_name);
+
+    while (logs && std::getline(logs, line)) {
+      if (line.length() == 0) {
+        continue;
+      }
+
+      b += recover_utility(line);
+    }
+    logs.close();
+
+    return b;
+  }
+
+
+}
+
 int checkpoint(int balance) {
   std::ofstream file;
   std::string file_name = "ledger" + file_suffix + ".txt";
@@ -78,20 +128,27 @@ int debit(std::string input, int *balance) {
 }
 
 int main(int argc, char** argv) {
-  int bank_balance = INITIAL_BANK_BALANCE;
+  int bank_balance;
   int return_code;
   int marker_count = 1;
   bool checkpoint_active = false;
   int staged_bank_balance;
+  int num_of_nodes;
 
-  //configuration parameters
+  // Configuration parameters
   int SERVER_PORT = std::stoi(argv[1]);
   int CLIENT_PORT = SERVER_PORT - 1;
   file_suffix = argv[1];
 
+  // Recovering from failure
+  bank_balance = recover();
+  std::cout << endl << "Current Balance = " << bank_balance << endl << endl;
+
   try {
     Socket::UDP s;
     s.bind(SERVER_PORT);
+    Socket::Datagram control_info = s.receive();
+    num_of_nodes = std::stoi(control_info.data);
 
     while (true) {
       Socket::Datagram d = s.receive();
@@ -103,13 +160,12 @@ int main(int argc, char** argv) {
           return_code = checkpoint(bank_balance);
           checkpoint_active = true;
         }
-        if (marker_count >= 2) {
+        if (marker_count >= num_of_nodes) {
           //s.send("127.0.0.1", CLIENT_PORT, "Successful Checkpoint");
-          std::cout << endl << "Received all markers. Saved all node and channel states." << endl << endl;
+          std::cout << endl << "Snapshot complete. Received all markers. Saved all node and channel states." << endl << endl;
           marker_count = 1;
           checkpoint_active = false;
         }
-        //TODO: Don't send back Successful message until all channel states get blocked
       }
       else if (d.data == "L") {
         int flag = 1;
@@ -128,7 +184,7 @@ int main(int argc, char** argv) {
           return_code = credit(d.data, &bank_balance);
           stage_transaction(d.address.port, d.data);
           marker_count++;
-          std::cout << marker_count << endl;
+          std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
         else {
           return_code = credit(d.data, &bank_balance);
@@ -140,7 +196,7 @@ int main(int argc, char** argv) {
           return_code = debit(d.data, &bank_balance);
           stage_transaction(d.address.port, d.data);
           marker_count++;
-          std::cout << marker_count << endl;
+          std::cout << "Current Balance = " << bank_balance << endl << endl;
         }
         else {
           return_code = debit(d.data, &bank_balance);

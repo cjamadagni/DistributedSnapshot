@@ -61,6 +61,7 @@ int main(int argc, char** argv) {
   // Initializing clients
   std::vector<int> nodes;
   initialize_clients(nodes, SERVER_PORT);
+  std::string num_of_nodes = std::to_string(nodes.size() + 1);
 
 
   try {
@@ -68,6 +69,9 @@ int main(int argc, char** argv) {
     // Creating and binding socket to port
     Socket::UDP s;
     s.bind(CLIENT_PORT);
+
+    // Sending topology information current node's server
+    s.send("127.0.0.1", SERVER_PORT, num_of_nodes);
 
     while (true) {
 
