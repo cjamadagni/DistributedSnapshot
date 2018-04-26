@@ -7,7 +7,6 @@ Client code for a particular node.
 #include <fstream>
 #include <string>
 #include <vector>
-//#include "Socket.hpp"
 #include "socket-wrapper.h"
 
 using namespace std;
@@ -107,7 +106,7 @@ int main(int argc, char** argv) {
   try {
 
     // Creating and binding socket to port
-    UDP s;
+    Socket s;
     s.bind(CLIENT_PORT);
 
     // Sending topology information current node's server
@@ -129,9 +128,9 @@ int main(int argc, char** argv) {
       else if (choice == 2) {
         cout << endl << "LAST SAVED STATE" << endl << endl;
         s.send("127.0.0.1", SERVER_PORT, "L");
-        Datagram d1 = s.receive();
+        Packet d1 = s.receive();
         cout << endl << d1.data << endl << endl;
-        Datagram d2 = s.receive();
+        Packet d2 = s.receive();
         if (d2.data.length() > 0) {
           cout << "Staged Transations" << endl;
           cout << d2.data << endl;

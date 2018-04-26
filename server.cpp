@@ -8,7 +8,6 @@ Server code for a particular node.
 #include <string>
 #include <vector>
 #include <cstdlib>
-//#include "Socket.hpp"
 #include "socket-wrapper.h"
 
 using namespace std;
@@ -171,13 +170,13 @@ int main(int argc, char** argv) {
   cout << endl << "Current Balance = " << bank_balance << endl << endl;
 
   try {
-    UDP s;
+    Socket s;
     s.bind(SERVER_PORT);
-    Datagram control_info = s.receive();
+    Packet control_info = s.receive();
     num_of_nodes = stoi(control_info.data);
 
     while (true) {
-      Datagram d = s.receive();
+      Packet d = s.receive();
 
       // Handling snapshot/marker messages
       if (d.data == "S") {

@@ -1,5 +1,5 @@
 /*
-  Lightweight wrapper for UDP sockets
+  Lightweight wrapper for Socket sockets
   @author Chirag Jamadagni
 */
 
@@ -13,31 +13,33 @@
 
 using namespace std;
 
+// Exception class constructor
 Exception::Exception(string m) {
   this->exception_msg = m;
 }
 
+// Exception class destructor
 Exception::~Exception() {
 }
 
+// Function to return the raised exception
 string Exception::exp() {
   return this->exception_msg;
 }
 
-UDP::UDP() {
+// Socket class constructor
+Socket::Socket() {
   this->id = socket(AF_INET, SOCK_DGRAM, 0);
   if (this->id == -1) throw Exception("Socket can't be created.");
   this->isBinded = false;
 }
 
-UDP::~UDP() {
+// Socket class destructor
+Socket::~Socket() {
 }
 
-void UDP::close() {
-  shutdown(this->id, SHUT_RDWR);
-}
-
-void UDP::bind(int port) {
+// Function to bind socket to a port
+void Socket::bind(int port) {
   struct sockaddr_in address;
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -57,7 +59,8 @@ void UDP::bind(int port) {
   this->isBinded = true;
 }
 
-void UDP::send(string ip, int port, string data) {
+// Function to send packet
+void Socket::send(string ip, int port, string data) {
   struct sockaddr_in address;
   address.sin_family = AF_INET;
   address.sin_port = htons(port);
@@ -70,11 +73,12 @@ void UDP::send(string ip, int port, string data) {
   }
 }
 
-Datagram UDP::receive() {
+// Function to receive packet
+Packet Socket::receive() {
   int size = sizeof(struct sockaddr_in);
   char *buffer = (char*)malloc(sizeof(char) * MAX_BUFFER);
   struct sockaddr_in address;
-  Datagram ret;
+  Packet ret;
 
   if (recvfrom(this->id, (void*)buffer, MAX_BUFFER, 0, (struct sockaddr*)&address, (socklen_t*)&size) == -1) throw Exception("Couldn't receive data.");
 
@@ -85,4 +89,9 @@ Datagram UDP::receive() {
   free(buffer);
 
   return ret;
+}
+
+// Function for closing a socket
+void Socket::close() {
+  shutdown(this->id, SHUT_RDWR);
 }

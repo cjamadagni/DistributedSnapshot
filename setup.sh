@@ -12,20 +12,7 @@ fi
 # Returning to root directory
 cd ..
 
-# Removing stray object files
-# if ls *.out >/dev/null 2>/dev/null
-# then
-#     rm *.out >/dev/null 2>/dev/null
-# fi
-
-# Compiling client
-#g++ client.cpp socket-wrapper.cpp -o client.out
-
-# Compiling server
-#g++ server.cpp socket-wrapper.cpp -o server.out
-
 # Running the initialization script
-#g++ initialize.cpp -o initialize
 ./initialize
 
 # Deleting initialization script object file
