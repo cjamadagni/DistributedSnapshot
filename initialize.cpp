@@ -6,30 +6,32 @@ Server code to create empty logs and ledgers.
 #include <iostream>
 #include <fstream>
 
+using namespace std;
+
 int main() {
-  std::string line;
-  std::ifstream file;
+  string line;
+  ifstream file;
   file.open("config.cfg");
 
   // Reading topology info from config file
-  while (file && std::getline(file, line)) {
+  while (file && getline(file, line)) {
     if (line.length() == 0) {
       continue;
     }
     int split_position = line.find(' ');
-    std::string temp = line.substr(split_position+1, line.length());
-    std::string file1 = "Data/ledger" + temp + ".txt";
-    std::string cmd2 = "touch Data/log" + temp + ".txt";
+    string temp = line.substr(split_position+1, line.length());
+    string file1 = "Data/ledger" + temp + ".txt";
+    string cmd2 = "touch Data/log" + temp + ".txt";
     const char* cmd = cmd2.c_str();
 
     // Initializing Ledger File
-    std::ofstream outfile;
+    ofstream outfile;
     outfile.open(file1);
     outfile << "N";
     outfile.close();
 
     // Initializing log file
-    std::system(cmd);
+    system(cmd);
   }
 
   file.close();

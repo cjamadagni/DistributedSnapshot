@@ -8,36 +8,39 @@ Server code for a particular node.
 #include <string>
 #include <vector>
 #include <cstdlib>
-#include "Socket.hpp"
+//#include "Socket.hpp"
+#include "socket-wrapper.h"
+
+using namespace std;
 
 // Constant control information
 #define INITIAL_BANK_BALANCE 100
-std::string file_suffix;
-std::string file_prefix = "Data/";
+string file_suffix;
+string file_prefix = "Data/";
 
 // Utility function to determine whether logged entry is credit/debit/invalid
-int recover_utility(std::string input) {
+int recover_utility(string input) {
   int pos = input.find(' ') + 1;
   char operation = input.at(pos);
 
   if (operation == 'C') {
-    return std::stoi(input.substr(pos + 2));
+    return stoi(input.substr(pos + 2));
   }
   else if (operation == 'D') {
-    return -1 * std::stoi(input.substr(pos + 2));
+    return -1 * stoi(input.substr(pos + 2));
   }
   else {
-    std::cout << endl << endl << "Recovery Log is Corrupted.\n\nTerminate Simulation and run setup.sh script." << endl << endl;
-    std::exit(0);
+    cout << endl << endl << "Recovery Log is Corrupted.\n\nTerminate Simulation and run setup.sh script." << endl << endl;
+    exit(0);
     return -1;
   }
 }
 
 // Function to recover state of node on failure
 int recover() {
-  std::string balance;
-  std::ifstream ledger;
-  std::string file_name = file_prefix + "ledger" + file_suffix + ".txt";
+  string balance;
+  ifstream ledger;
+  string file_name = file_prefix + "ledger" + file_suffix + ".txt";
   ledger.open(file_name);
   ledger >> balance;
   ledger.close();
@@ -47,14 +50,14 @@ int recover() {
   }
   else {
 
-    int b = std::stoi(balance);
+    int b = stoi(balance);
 
-    std::string line;
-    std::ifstream logs;
-    std::string file_name = file_prefix + "log" + file_suffix + ".txt";
+    string line;
+    ifstream logs;
+    string file_name = file_prefix + "log" + file_suffix + ".txt";
     logs.open(file_name);
 
-    while (logs && std::getline(logs, line)) {
+    while (logs && getline(logs, line)) {
       if (line.length() == 0) {
         continue;
       }
@@ -71,27 +74,27 @@ int recover() {
 
 // Function to checkpoint/ take snapshot
 int checkpoint(int balance) {
-  std::ofstream file;
-  std::string file_name = file_prefix + "ledger" + file_suffix + ".txt";
+  ofstream file;
+  string file_name = file_prefix + "ledger" + file_suffix + ".txt";
   file.open(file_name, ios::out);
   file << balance;
   file.close();
 
   // Deleting old log
-  std::string logfile_name = file_prefix + "log" + file_suffix + ".txt";
-  std::ofstream log_file;
-  log_file.open(logfile_name, std::ofstream::out | std::ofstream::trunc);
+  string logfile_name = file_prefix + "log" + file_suffix + ".txt";
+  ofstream log_file;
+  log_file.open(logfile_name, ofstream::out | ofstream::trunc);
   log_file.close();
 
   return 1;
 }
 
 // Function to capture channel state/ staged transactions
-void stage_transaction(int node_id, std::string input) {
-  //std::string t = std::to_string(node_id+1) + " " + input;
-  std::string t = input + " " + std::to_string(node_id+1);
-  std::ofstream file;
-  std::string file_name = file_prefix + "log" + file_suffix + ".txt";
+void stage_transaction(int node_id, string input) {
+  //string t = to_string(node_id+1) + " " + input;
+  string t = input + " " + to_string(node_id+1);
+  ofstream file;
+  string file_name = file_prefix + "log" + file_suffix + ".txt";
   file.open(file_name, ios::app);
   file << t;
   file << "\n";
@@ -99,10 +102,10 @@ void stage_transaction(int node_id, std::string input) {
 }
 
 // Function to obtain the last checkpointed ledger value
-std::string last_checkpointed_node_state(int *flag) {
-  std::string balance;
-  std::ifstream file;
-  std::string file_name = file_prefix + "ledger" + file_suffix + ".txt";
+string last_checkpointed_node_state(int *flag) {
+  string balance;
+  ifstream file;
+  string file_name = file_prefix + "ledger" + file_suffix + ".txt";
   file.open(file_name);
   file >> balance;
   file.close();
@@ -117,14 +120,14 @@ std::string last_checkpointed_node_state(int *flag) {
 }
 
 // Function to obtain the staged transactions
-std::string last_checkpointed_channel_states() {
-  std::string staged_transactions = "";
-  std::string line;
-  std::ifstream file;
-  std::string file_name = file_prefix + "log" + file_suffix + ".txt";
+string last_checkpointed_channel_states() {
+  string staged_transactions = "";
+  string line;
+  ifstream file;
+  string file_name = file_prefix + "log" + file_suffix + ".txt";
   file.open(file_name);
 
-  while (file && std::getline(file, line)) {
+  while (file && getline(file, line)) {
     if (line.length() == 0) {
       continue;
     }
@@ -137,15 +140,15 @@ std::string last_checkpointed_channel_states() {
 }
 
 // Function to credit an amount to the bank balance
-int credit(std::string input, int *balance) {
-  int credit_amount = std::stoi(input.substr(2));
+int credit(string input, int *balance) {
+  int credit_amount = stoi(input.substr(2));
   *balance += credit_amount;
   return 1;
 }
 
 // Function to debit an amount from the bank balance
-int debit(std::string input, int *balance) {
-  int debit_amount = std::stoi(input.substr(2));
+int debit(string input, int *balance) {
+  int debit_amount = stoi(input.substr(2));
   *balance -= debit_amount;
   return 1;
 }
@@ -159,26 +162,26 @@ int main(int argc, char** argv) {
   int num_of_nodes;
 
   // Configuration parameters
-  int SERVER_PORT = std::stoi(argv[1]);
+  int SERVER_PORT = stoi(argv[1]);
   int CLIENT_PORT = SERVER_PORT - 1;
   file_suffix = argv[1];
 
   // Recovering from failure
   bank_balance = recover();
-  std::cout << endl << "Current Balance = " << bank_balance << endl << endl;
+  cout << endl << "Current Balance = " << bank_balance << endl << endl;
 
   try {
-    Socket::UDP s;
+    UDP s;
     s.bind(SERVER_PORT);
-    Socket::Datagram control_info = s.receive();
-    num_of_nodes = std::stoi(control_info.data);
+    Datagram control_info = s.receive();
+    num_of_nodes = stoi(control_info.data);
 
     while (true) {
-      Socket::Datagram d = s.receive();
+      Datagram d = s.receive();
 
       // Handling snapshot/marker messages
       if (d.data == "S") {
-        std::cout << endl << "Received checkpoint marker." << endl << endl;
+        cout << endl << "Received checkpoint marker." << endl << endl;
         marker_count++;
 
         if (marker_count == 1) {
@@ -186,7 +189,7 @@ int main(int argc, char** argv) {
           checkpoint_active = true;
         }
         if (marker_count >= num_of_nodes) {
-          std::cout << endl << "Snapshot complete. Received all markers. Saved all node and channel states." << endl << endl;
+          cout << endl << "Snapshot complete. Received all markers. Saved all node and channel states." << endl << endl;
           marker_count = 0;
           checkpoint_active = false;
         }
@@ -214,11 +217,11 @@ int main(int argc, char** argv) {
           return_code = credit(d.data, &bank_balance);
           stage_transaction(d.address.port, d.data);
           //marker_count++;
-          std::cout << "Current Balance = " << bank_balance << endl << endl;
+          cout << "Current Balance = " << bank_balance << endl << endl;
         }
         else {
           return_code = credit(d.data, &bank_balance);
-          std::cout << "Current Balance = " << bank_balance << endl << endl;
+          cout << "Current Balance = " << bank_balance << endl << endl;
         }
       }
 
@@ -228,18 +231,18 @@ int main(int argc, char** argv) {
           return_code = debit(d.data, &bank_balance);
           stage_transaction(d.address.port, d.data);
           //marker_count++;
-          std::cout << "Current Balance = " << bank_balance << endl << endl;
+          cout << "Current Balance = " << bank_balance << endl << endl;
         }
         else {
           return_code = debit(d.data, &bank_balance);
-          std::cout << "Current Balance = " << bank_balance << endl << endl;
+          cout << "Current Balance = " << bank_balance << endl << endl;
         }
       }
 
     }
   }
-  catch(Socket::Exception &e) {
-    std::cout << e.what() << endl << endl;
+  catch(Exception &e) {
+    cout << e.exp() << endl << endl;
   }
   return 1;
 }

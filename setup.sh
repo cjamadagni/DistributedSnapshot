@@ -19,10 +19,10 @@ then
 fi
 
 # Compiling client
-g++ client.cpp -o client.out
+g++ client.cpp socket-wrapper.cpp -o client.out
 
 # Compiling server
-g++ server.cpp -o server.out
+g++ server.cpp socket-wrapper.cpp -o server.out
 
 # Compiling and running the initialization script
 g++ initialize.cpp -o initialize
