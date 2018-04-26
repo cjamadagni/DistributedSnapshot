@@ -16,9 +16,10 @@ int main() {
     if (line.length() == 0) {
       continue;
     }
-
-    std::string file1 = "Data/ledger" + line + ".txt";
-    std::string cmd2 = "touch Data/log" + line + ".txt";
+    int split_position = line.find(' ');
+    std::string temp = line.substr(split_position+1, line.length());
+    std::string file1 = "Data/ledger" + temp + ".txt";
+    std::string cmd2 = "touch Data/log" + temp + ".txt";
     const char* cmd = cmd2.c_str();
 
     // Initializing Ledger File

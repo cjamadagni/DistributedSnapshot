@@ -7,6 +7,7 @@ Server code for a particular node.
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cstdlib>
 #include "Socket.hpp"
 
 // Constant control information
@@ -16,16 +17,18 @@ std::string file_prefix = "Data/";
 
 // Utility function to determine whether logged entry is credit/debit/invalid
 int recover_utility(std::string input) {
-  char operation = input.at(5);
+  int pos = input.find(' ') + 1;
+  char operation = input.at(pos);
 
   if (operation == 'C') {
-    return std::stoi(input.substr(7));
+    return std::stoi(input.substr(pos + 2));
   }
   else if (operation == 'D') {
-    return -1 * std::stoi(input.substr(7));
+    return -1 * std::stoi(input.substr(pos + 2));
   }
   else {
     std::cout << endl << endl << "Recovery Log is Corrupted.\n\nTerminate Simulation and run setup.sh script." << endl << endl;
+    std::exit(0);
     return -1;
   }
 }
@@ -85,7 +88,8 @@ int checkpoint(int balance) {
 
 // Function to capture channel state/ staged transactions
 void stage_transaction(int node_id, std::string input) {
-  std::string t = std::to_string(node_id+1) + " " + input;
+  //std::string t = std::to_string(node_id+1) + " " + input;
+  std::string t = input + " " + std::to_string(node_id+1);
   std::ofstream file;
   std::string file_name = file_prefix + "log" + file_suffix + ".txt";
   file.open(file_name, ios::app);

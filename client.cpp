@@ -9,29 +9,53 @@ Client code for a particular node.
 #include <vector>
 #include "Socket.hpp"
 
+typedef struct {
+  std::string ip;
+  int port;
+} Node;
+
+// Given a node id, return the corresponding IP and port
+Node getNodeInformation(std::vector<Node> &v, int id) {
+  Node n;
+
+  for (int i = 0; i < v.size(); i++) {
+    if (v.at(i).port == id) {
+      n.ip = v.at(i).ip;
+      n.port = v.at(i).port;
+      break;
+    }
+  }
+
+  return n;
+}
 
 // Function to read config file and identify all node IDs
-void initialize_clients(std::vector<int> &v, int my_port) {
+void initialize_clients(std::vector<Node> &v, int node_id) {
   std::string line;
   std::ifstream file;
   file.open("config.cfg");
+
   while (file && std::getline(file, line)) {
     if (line.length() == 0) {
       continue;
     }
-    int port = std::stoi(line);
-    if (port != my_port) {
-        v.push_back(port);
+
+    int split_position = line.find(' ');
+    int port = std::stoi(line.substr(split_position+1, line.length()));
+    if (port != node_id) {
+      Node x;
+      x.port = port;
+      x.ip = line.substr(0,split_position);
+      v.push_back(x);
     }
   }
-  file.close();
 }
 
 // Input validation to ensure that a valid node ID is entered for credit/debit operations
-bool input_check(int node_id, std::vector<int> &v) {
+bool input_check(int node_id, std::vector<Node> &v) {
   bool flag = false;
   for (int i=0; i<v.size(); i++) {
-    if (v.at(i) == node_id) {
+    if (v.at(i).port == node_id) {
       flag = true;
     }
   }
@@ -72,7 +96,7 @@ int main(int argc, char** argv) {
   std::cout<<"\n\nNode ID = " << SERVER_PORT;
 
   // Initializing clients
-  std::vector<int> nodes;
+  std::vector<Node> nodes;
   initialize_clients(nodes, SERVER_PORT);
   std::string num_of_nodes = std::to_string(nodes.size() + 1);
 
@@ -93,7 +117,7 @@ int main(int argc, char** argv) {
       // Trigger checkpoint / propogate snapshot markers
       if (choice == 1) {
         for (int i=0; i<nodes.size(); i++) {
-          s.send("127.0.0.1", nodes.at(i), "S");
+          s.send(nodes.at(i).ip, nodes.at(i).port, "S");
         }
         s.send("127.0.0.1", SERVER_PORT, "S");
       }
@@ -133,11 +157,12 @@ int main(int argc, char** argv) {
           out_msg = "D " + std::to_string(amount);
           in_msg = "C " + std::to_string(amount);
         }
-        s.send("127.0.0.1", node_id, out_msg);
+        Node recipient = getNodeInformation(nodes, node_id);
+        s.send(recipient.ip, recipient.port, out_msg);
         s.send("127.0.0.1", SERVER_PORT, in_msg);
       }
 
-      // Powering off the node / Used to simulate failure.
+      // Powering off node / Used to simulate failure.
       else if (choice == 0) {
         s.send("127.0.0.1", SERVER_PORT, "T");
         s.close();
