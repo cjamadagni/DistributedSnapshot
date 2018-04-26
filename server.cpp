@@ -91,8 +91,8 @@ int checkpoint(int balance) {
 
 // Function to capture channel state/ staged transactions
 void stage_transaction(int node_id, string input) {
-  //string t = to_string(node_id+1) + " " + input;
-  string t = input + " " + to_string(node_id+1);
+  string t = to_string(node_id+1) + " " + input;
+  //string t = input + " " + to_string(node_id+1);
   ofstream file;
   string file_name = file_prefix + "log" + file_suffix + ".txt";
   file.open(file_name, ios::app);

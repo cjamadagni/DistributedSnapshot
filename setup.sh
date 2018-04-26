@@ -13,19 +13,19 @@ fi
 cd ..
 
 # Removing stray object files
-if ls *.out >/dev/null 2>/dev/null
-then
-    rm *.out >/dev/null 2>/dev/null
-fi
+# if ls *.out >/dev/null 2>/dev/null
+# then
+#     rm *.out >/dev/null 2>/dev/null
+# fi
 
 # Compiling client
-g++ client.cpp socket-wrapper.cpp -o client.out
+#g++ client.cpp socket-wrapper.cpp -o client.out
 
 # Compiling server
-g++ server.cpp socket-wrapper.cpp -o server.out
+#g++ server.cpp socket-wrapper.cpp -o server.out
 
-# Compiling and running the initialization script
-g++ initialize.cpp -o initialize
+# Running the initialization script
+#g++ initialize.cpp -o initialize
 ./initialize
 
 # Deleting initialization script object file

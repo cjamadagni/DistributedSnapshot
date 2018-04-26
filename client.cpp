@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
 
       // Display the last checkpoint state
       else if (choice == 2) {
+        cout << endl << "LAST SAVED STATE" << endl << endl;
         s.send("127.0.0.1", SERVER_PORT, "L");
         Datagram d1 = s.receive();
         cout << endl << d1.data << endl << endl;
