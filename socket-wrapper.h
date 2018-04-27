@@ -1,5 +1,5 @@
 /*
-  Lightweight wrapper for UDP sockets
+  Lightweight socket wrapper
   @author Chirag Jamadagni
 */
 
@@ -41,7 +41,7 @@ class Exception {
     string exp();
 };
 
-// Class for socket wrapper 
+// Class for socket wrapper
 class Socket {
   // defining private members
   private:

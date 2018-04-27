@@ -1,5 +1,5 @@
 /*
-  Lightweight wrapper for Socket sockets
+  Lightweight socket wrapper
   @author Chirag Jamadagni
 */
 
