@@ -1,5 +1,5 @@
 /*
-Server code to create empty logs and ledgers.
+Code to create empty logs and ledgers.
 @author Chirag Jamadagni
 */
 
